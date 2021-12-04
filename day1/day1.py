@@ -3,16 +3,16 @@ with open("input.txt") as f:
 
 inc = 0
 for i in range(len(depths)):
-    if i > 0 :
-        if depths[i] > depths[i-1]:
+    if i > 0:
+        if depths[i] > depths[i - 1]:
             inc += 1
 print(inc)
 
-depths_pack = [depths[i:i+3] for i in range(0, len(depths))]
+depths_pack = [depths[i : i + 3] for i in range(0, len(depths))]
 
 inc = 0
 for i in range(len(depths_pack)):
     if i > 0:
-        if sum(depths_pack[i]) > sum(depths_pack[i-1]):
+        if sum(depths_pack[i]) > sum(depths_pack[i - 1]):
             inc += 1
-print(inc)    
+print(inc)

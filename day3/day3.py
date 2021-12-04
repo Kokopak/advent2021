@@ -22,10 +22,10 @@ def get_rating(char_1, char_2):
 
     for i in range(len(bits[0])):
         match_bits = [b for b in bits if b.startswith(final_bits)]
-        
+
         if len(match_bits) == 1:
             return match_bits[0]
-        
+
         column_bits = list(zip(*match_bits))
         column = column_bits[i]
 
@@ -35,11 +35,11 @@ def get_rating(char_1, char_2):
             final_bits += char_2
         else:
             final_bits += char_1
-    
+
     return final_bits
+
 
 oxygen = int(get_rating("1", "0"), 2)
 co2 = int(get_rating("0", "1"), 2)
 
-print(oxygen*co2)
-
+print(oxygen * co2)
