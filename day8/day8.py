@@ -1,3 +1,5 @@
+from collections import Counter
+
 patterns_outputs = []
 with open("input.txt") as f:
     for l in f.readlines():
@@ -12,18 +14,18 @@ nb_segments = [6, 2, 5, 5, 4, 5, 6, 3, 7, 6]
 
 # part 1
 
-S_unique_seg = 0
+s = []
 for po in patterns_outputs:
-    for output in po[1]:
-        if len(output) in [
-            nb_segments[1],
-            nb_segments[4],
-            nb_segments[7],
-            nb_segments[8],
-        ]:
-            S_unique_seg += 1
+    s.extend(
+        [
+            output
+            for output in po[1]
+            if len(output)
+            in [nb_segments[1], nb_segments[4], nb_segments[7], nb_segments[8]]
+        ]
+    )
 
-print(S_unique_seg)
+print(len(s))
 
 # part 2
 
@@ -41,10 +43,45 @@ contains = {
 }
 
 
+def get_decode(dcd, patterns):
+    # print(dcd)
+    nb_segments = [6, 2, 5, 5, 4, 5, 6, 3, 7, 6]
+
+    if list(sorted(dcd.values())) == list(range(10)):
+        print("=>", dcd)
+        return dcd
+
+    for pattern in patterns:
+        if pattern not in dcd:
+
+            set_pattern = set(pattern)
+            for decode in dcd:
+                set_decode = set(decode)
+                if set_decode.issubset(set_pattern):
+                    for cont in contains[dcd[decode]]:
+                        if (
+                            cont not in dcd.values()
+                            and len(pattern) == nb_segments[cont]
+                        ):
+                            dcd_tmp = dcd.copy()
+                            dcd_tmp[pattern] = cont
+                            gd = get_decode(dcd_tmp, patterns)
+
+                            if gd:
+                                return gd
+
+            for nb, nb_segment in enumerate(nb_segments):
+                if nb_segment == len(pattern) and nb not in dcd.values():
+                    dcd_tmp = dcd.copy()
+                    dcd_tmp[pattern] = nb
+                    gd = get_decode(dcd_tmp, patterns)
+                    if gd:
+                        return gd
+
+
 for po in patterns_outputs:
-    patterns = po[0]
-    decoded = patterns[:]
     decoded_dict = {}
+    patterns, outputs = po
 
     for i_p, pattern in enumerate(patterns):
         if len(pattern) in [
@@ -53,13 +90,19 @@ for po in patterns_outputs:
             nb_segments[7],
             nb_segments[8],
         ]:
-            decoded[i_p] = nb_segments.index(len(pattern))
             decoded_dict[pattern] = nb_segments.index(len(pattern))
-        else:
 
-            print(nb_segments[len(pattern)])
+    decoded = get_decode(
+        decoded_dict,
+        patterns,
+    )
+    print(decoded)
 
-print("\t".join(patterns_outputs[0][0]))
-print("\t".join(map(str, decoded)))
+    # decoded_sorted = {"".join(sorted(k)): v for k, v in decoded.items()}
+    # decoded_output = []
+    # for output in outputs:
+    #     output_sorted = "".join(sorted(output))
+    #     decoded_output.append(decoded_sorted[output_sorted])
 
-print(decoded_dict)
+    # print(decoded_output)
+    # # print([decoded[o] for o in output])
