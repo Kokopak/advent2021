@@ -1,3 +1,5 @@
+import math
+
 heightmap = {}
 height = 0
 width = 0
@@ -49,40 +51,30 @@ print(low_points)
 
 # part 2
 
-POS = [(i, j) for i in range(-1, 2) for j in range(-1, 2)]
 
-
-def find_basin(point, basins=set()):
-    basins.add(point)
-
+def find_basin(point, basins):
     r_point, c_point = point
 
-    new_points = False
+    to_try = set()
 
     for pos in POS:
         r_pos, c_pos = pos
         new_r_point, new_c_point = (r_point + r_pos, c_point + c_pos)
-
-        print(point, "-", (new_r_point, new_c_point))
 
         if (new_r_point, new_c_point) in heightmap and (
             new_r_point,
             new_c_point,
         ) not in basins:
             if heightmap[(new_r_point, new_c_point)] != 9:
-                basins.add((new_r_point, new_c_point))
-                new_points = True
+                to_try.add((new_r_point, new_c_point))
+                basins.append((new_r_point, new_c_point))
 
-    if new_points:
-        for basin in basins:
-            fb = find_basin(basin, basins)
+    for tt in to_try:
+        find_basin(tt, basins)
 
-            if fb:
-                basins.update(fb)
-                return basins
-    else:
-
-        return basins
+    return basins
 
 
-print(find_basin((0, 1)))
+lens = [len(find_basin(lp, [])) for lp in lower_points]
+lens.sort(reverse=True)
+print(math.prod(lens[:3]))
