@@ -21,39 +21,28 @@ with open("input.txt") as f:
 height = max(coords, key=lambda x: x[1])[1] + 1
 width = max(coords, key=lambda x: x[0])[0] + 1
 
-sheet = [[0 for x in range(width)] for y in range(height)]
+sheet = np.zeros((height, width))
 
 for coord in coords:
     x, y = coord
-    sheet[y][x] = 1
-
-sheet = np.array(sheet)
-new_sheet = np.copy(sheet)
+    sheet[y, x] = 1
 
 for i, instruction in enumerate(instructions):
     axis, coord = instruction
     if axis == "y":
-        cropped = new_sheet[:coord, :]
-        flipped = np.flipud(new_sheet[coord + 1 :, :])
+        cropped = sheet[:coord, :]
+        flipped = np.flipud(sheet[coord + 1 :, :])
     else:
-        cropped = new_sheet[:, :coord]
-        flipped = np.fliplr(new_sheet[:, coord + 1 :])
+        cropped = sheet[:, :coord]
+        flipped = np.fliplr(sheet[:, coord + 1 :])
 
-    width_cropped = len(cropped[0, :])
-    height_cropped = len(cropped)
-
-    new_sheet = np.array(
-        [
-            [1 if cropped[y, x] or flipped[y, x] else 0 for x in range(width_cropped)]
-            for y in range(height_cropped)
-        ]
-    )
+    sheet = np.logical_or(cropped, flipped).astype(int)
 
     # p1
     if i == 0:
-        print(np.sum(new_sheet))
+        print(np.sum(sheet))
 
-for y in range(len(new_sheet)):
-    for x in range(len(new_sheet[0, :])):
-        print(new_sheet[y, x] if new_sheet[y, x] else " ", end="")
+for y in range(len(sheet)):
+    for x in range(len(sheet[0, :])):
+        print(sheet[y, x] if sheet[y, x] else " ", end="")
     print()
