@@ -1,3 +1,6 @@
+import functools
+
+
 HEX_TO_BIN = {
     "0": "0000",
     "1": "0001",
@@ -15,6 +18,16 @@ HEX_TO_BIN = {
     "D": "1101",
     "E": "1110",
     "F": "1111",
+}
+
+TYPE_ID_OP = {
+    0: lambda x, y: x + y,
+    1: lambda x, y: x * y,
+    2: min,
+    3: max,
+    5: lambda x, y: 1 if x > y else 0,
+    6: lambda x, y: 1 if x < y else 0,
+    7: lambda x, y: 1 if x == y else 0,
 }
 
 
@@ -68,8 +81,12 @@ def gen_packet_p1(bin_str):
 
 
 def gen_packet_p2(bin_str):
+
+    if isinstance(bin_str, int):
+        return bin_str
+
     if bin_str == [] or len(set(bin_str)) == 1:
-        return
+        return 0
 
     version = int("".join(pop(bin_str, 3)), 2)
     type_id = int("".join(pop(bin_str, 3)), 2)
@@ -82,24 +99,32 @@ def gen_packet_p2(bin_str):
             if bin_str[0] != "0"
         ]
         groups.append("".join(pop(bin_str, 5)))
-        gen_packet_p2(bin_str)
 
-        return int("".join(groups), 2)
-
+        return gen_packet_p2(int("".join(groups), 2))
     else:
         print(f"OP {version} {type_id} +>", "".join(bin_str))
+        packets = []
 
         length_type_id = int("".join(pop(bin_str, 1)), 2)
 
         if length_type_id == 0:
             length_sub_packet = int("".join(pop(bin_str, 15)), 2)
-            gen_packet_p2(pop(bin_str, length_sub_packet))
+            packet = pop(bin_str, length_sub_packet)
+            while packet != "":
+                gp2 = gen_packet_p2(packet)
+                packets.append(gp2)
         else:
             number_sub_packets = int("".join(pop(bin_str, 11)), 2)
             for _ in range(number_sub_packets):
-                gen_packet_p2(bin_str)
+                gp2 = gen_packet_p2(bin_str)
+                packets.append(gp2)
 
-    return gen_packet_p2(bin_str)
+        print(type_id, packets)
+        if len(packets):
+            # print(type_id, packets, functools.reduce(TYPE_ID_OP[type_id], packets))
+            return functools.reduce(TYPE_ID_OP[type_id], packets)
+
+    # return gen_packet_p2(bin_str)
 
 
 bin_str = list(hex_to_bin("9C0141080250320F1802104A08"))
